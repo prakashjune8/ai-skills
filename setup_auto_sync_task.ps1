@@ -1,6 +1,6 @@
 # Register Windows Scheduled Task for Autonomous GitHub Sync
 $TaskName = "AntigravityGitHubAutoSync"
-$VbsPath = "D:\AI SKILLS\launch_auto_sync_silent.vbs"
+$VbsPath = "D:\ANTIGRAVITY PROJECT FOLDER\AI SKILLS\launch_auto_sync_silent.vbs"
 
 # Check if task already exists
 $existing = Get-ScheduledTask -TaskName $TaskName -ErrorAction SilentlyContinue
