@@ -15,22 +15,16 @@ GITHUB_USER = "prakashjune8"
 
 # Standard directories to monitor for project discovery
 MONITORED_ROOTS = [
-    r"D:",
     r"D:\ANTIGRAVITY PROJECT FOLDER",
     r"D:\ANTIGRAVITY PROJECT FOLDER\AI SKILLS",
-    r"D:\AI SKILLS",
 ]
 
 # Explicit directory to repository mappings
 PROJECT_REGISTRY: dict[str, str] = {
     r"D:\ANTIGRAVITY PROJECT FOLDER\ephemeris": "gann-astrological-trading",
-    r"d:\ephemeris": "gann-astrological-trading",
     r"D:\ANTIGRAVITY PROJECT FOLDER\AI SKILLS\AI-Mastery-Masterclass": "google-ai-mastery",
-    r"D:\AI SKILLS\AI-Mastery-Masterclass": "google-ai-mastery",
     r"D:\ANTIGRAVITY PROJECT FOLDER\AI SKILLS\GLOBAL_SKILL_LIBRARY": "antigravity-global-skills",
-    r"D:\AI SKILLS\GLOBAL_SKILL_LIBRARY": "antigravity-global-skills",
     r"D:\ANTIGRAVITY PROJECT FOLDER\THARUN PROJECT": "tharun_studyhour",
-    r"D:\THARUN PROJECT": "tharun_studyhour",
 }
 
 IGNORED_DIRS = {
