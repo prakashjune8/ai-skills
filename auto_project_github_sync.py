@@ -11,6 +11,19 @@ import subprocess
 import shutil
 from datetime import datetime
 
+# Enforce silent execution without console/cmd window creation on Windows
+CREATE_NO_WINDOW = 0x08000000 if os.name == "nt" else 0
+
+def run_proc(args, **kwargs):
+    if CREATE_NO_WINDOW and "creationflags" not in kwargs:
+        kwargs["creationflags"] = CREATE_NO_WINDOW
+    return subprocess.run(args, **kwargs)
+
+def check_output_proc(args, **kwargs):
+    if CREATE_NO_WINDOW and "creationflags" not in kwargs:
+        kwargs["creationflags"] = CREATE_NO_WINDOW
+    return subprocess.check_output(args, **kwargs)
+
 GITHUB_USER = "prakashjune8"
 
 # Standard directories to monitor for project discovery
@@ -140,11 +153,11 @@ def sync_project(project_path: str):
     # Step 1: Initialize git if missing
     if not os.path.exists(git_dir):
         log(f"    [+] Initializing new git repository...")
-        subprocess.run(["git", "init", "-b", "main"], cwd=norm_path, check=True, capture_output=True)
+        run_proc(["git", "init", "-b", "main"], cwd=norm_path, check=True, capture_output=True)
 
     # Step 2: Check current branch
     try:
-        branch = subprocess.check_output(
+        branch = check_output_proc(
             ["git", "branch", "--show-current"], cwd=norm_path, text=True
         ).strip()
         if not branch:
@@ -153,7 +166,7 @@ def sync_project(project_path: str):
         branch = "main"
 
     # Step 3: Check if remote exists
-    remotes = subprocess.check_output(
+    remotes = check_output_proc(
         ["git", "remote", "-v"], cwd=norm_path, text=True
     ).strip()
 
@@ -161,13 +174,13 @@ def sync_project(project_path: str):
         log(f"    [+] No remote configured. Creating GitHub repository: {GITHUB_USER}/{repo_name}...")
         try:
             # Stage all files
-            subprocess.run(["git", "add", "-A"], cwd=norm_path, check=True, capture_output=True)
-            subprocess.run(
+            run_proc(["git", "add", "-A"], cwd=norm_path, check=True, capture_output=True)
+            run_proc(
                 ["git", "commit", "-m", f"Initial commit for {repo_name}"],
                 cwd=norm_path, check=False, capture_output=True
             )
             # Create repo on GitHub and push
-            res = subprocess.run(
+            res = run_proc(
                 [
                     "gh", "repo", "create", repo_name,
                     "--public",
@@ -189,22 +202,22 @@ def sync_project(project_path: str):
     # Step 4: Sync existing repository (stage, commit if dirty, push)
     try:
         # Check status
-        status = subprocess.check_output(
+        status = check_output_proc(
             ["git", "status", "--porcelain"], cwd=norm_path, text=True
         ).strip()
 
         if status:
             log(f"    [*] Detected changes. Staging and committing...")
-            subprocess.run(["git", "add", "-A"], cwd=norm_path, check=True, capture_output=True)
+            run_proc(["git", "add", "-A"], cwd=norm_path, check=True, capture_output=True)
             now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            subprocess.run(
+            run_proc(
                 ["git", "commit", "-m", f"Auto-sync progress: {now_str}"],
                 cwd=norm_path, check=True, capture_output=True
             )
 
         # Push to remote
         log(f"    [^] Pushing to origin {branch}...")
-        push_res = subprocess.run(
+        push_res = run_proc(
             ["git", "push", "origin", branch],
             cwd=norm_path, text=True, capture_output=True
         )
@@ -214,8 +227,8 @@ def sync_project(project_path: str):
             # If rejected because remote has changes, pull --rebase then push
             if "fetch first" in push_res.stderr or "non-fast-forward" in push_res.stderr:
                 log(f"    [*] Remote has newer commits. Pulling with rebase...")
-                subprocess.run(["git", "pull", "--rebase", "origin", branch], cwd=norm_path, capture_output=True)
-                subprocess.run(["git", "push", "origin", branch], cwd=norm_path, capture_output=True)
+                run_proc(["git", "pull", "--rebase", "origin", branch], cwd=norm_path, capture_output=True)
+                run_proc(["git", "push", "origin", branch], cwd=norm_path, capture_output=True)
                 log(f"    [SUCCESS] Rebased and pushed cleanly.")
             else:
                 log(f"    [Notice] Push output: {push_res.stderr.strip() or push_res.stdout.strip()}")
